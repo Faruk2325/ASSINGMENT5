@@ -36,3 +36,174 @@ function displayIssues(issues){
         issue.status === "open"
         ? "border-green-500"
         : "border-purple-500";
+
+        const icon =
+        issue.status === "open"
+        ? "./assets/Open-Status.png"
+        : "/assets/Closed- Status .png";
+
+        div.className =
+        `bg-white p-5 rounded-xl shadow border-t-4 ${border} cursor-pointer`;
+
+        const labelsHTML = issue.labels.map(label => {
+            let labelIcon = "";
+            let labelColor = "border-gray-300 text-gray-500";
+            
+            const lowerLabel = label.toLowerCase();
+            if (lowerLabel === "bug") {
+                labelIcon = "./assets/BugDroid.png";
+                labelColor = "border-red-300 text-red-500";
+            } else if (lowerLabel === "help wanted") {
+                labelIcon = "./assets/Vector.png";
+                labelColor = "border-yellow-400 text-yellow-600";
+            } else if (lowerLabel === "enhancement") {
+                labelIcon = "./assets/Sparkle.png";
+                labelColor = "border-blue-300 text-blue-500";
+            } else if (lowerLabel === "documentation") {
+                labelIcon = "./assets/Aperture.png";
+                labelColor = "border-green-300 text-green-500";
+            } else if (lowerLabel === "good first issue") {
+                labelIcon = "./assets/Aperture.png";
+                labelColor = "border-purple-300 text-purple-500";
+            }
+
+            return `
+                <span class="border ${labelColor} px-3 py-1 rounded-full text-sm uppercase flex items-center gap-1">
+                    ${labelIcon ? `<img src="${labelIcon}" class="w-4 h-4">` : ""}
+                    ${label}
+                </span>
+            `;
+        }).join("");
+
+        div.innerHTML = `
+        <div class="flex justify-between items-start">
+            <div class="bg-green-100 p-2 rounded-full">
+                <img src="${icon}" class="w-5">
+            </div>
+
+            <div class="bg-red-100 text-red-500 px-4 py-1 rounded-full text-sm font-semibold uppercase">
+                ${issue.priority}
+            </div>
+        </div>
+
+        <h2 class="font-bold text-xl mt-4 text-gray-800">
+        ${issue.title}
+        </h2>
+
+        <p class="text-gray-500 mt-2 line-clamp-2">
+        ${issue.description}
+        </p>
+
+        <div class="flex gap-3 mt-4">
+            ${labelsHTML}
+        </div>
+
+        <div class="border-t mt-5 pt-3 text-gray-500 text-sm">
+            <p>#${issue.id} by ${issue.author}</p>
+            <p>${new Date(issue.createdAt).toLocaleDateString()}</p>
+        </div>
+        `;
+
+        div.addEventListener("click", () =>{
+            openIssueModal(issue);
+        });
+
+        issuesContainer.appendChild(div);
+    });
+}
+function openIssueModal(issue){
+
+    modalContent.innerHTML = `
+        <h2 class="text-2xl font-bold mb-3">
+        ${issue.title}
+        </h2>
+
+        <p class="text-gray-600 mb-4 line-clamp-2">
+        ${issue.description}.
+        </p>
+
+        <div class="flex gap-2 mb-4">
+            <span class="border px-3 py-1 rounded text-red-500">
+            Priority : ${issue.priority}
+            </span>
+
+
+            <span class="border px-3 py-1 rounded text-green-500">
+            Status : ${issue.status}
+            </span>
+        </div>
+
+        <div class="text-sm text-gray-500">
+            <p><b>Author :</b> ${issue.author}</p>
+            <p><b>ID :</b> ${issue.id}</p>
+            <p>${new Date(issue.createdAt).toLocaleDateString()}</p>
+        </div>
+    `;
+
+    modal.showModal();
+}
+
+buttons.forEach(button =>{
+
+    button.addEventListener("click", () =>{
+
+        buttons.forEach(btn =>
+        btn.classList.remove("btn-primary"));
+
+        button.classList.add("btn-primary");
+
+        const status = button.dataset.status;
+
+        if(status === "all"){
+            displayIssues(allIssues);
+        }
+        else{
+
+            const filtered =
+            allIssues.filter(issue =>
+            issue.status === status);
+
+            displayIssues(filtered);
+        }
+
+    });
+
+});
+
+searchInput.addEventListener("input", () =>{
+
+    const query =
+    searchInput.value.toLowerCase();
+
+    const filtered =
+    allIssues.filter(issue =>
+
+        issue.title
+        .toLowerCase()
+        .includes(query)
+
+        ||
+
+        issue.description
+        .toLowerCase()
+        .includes(query)
+
+    );
+
+    displayIssues(filtered);
+
+});
+
+window.addEventListener("load", () =>{
+
+    loader.classList.remove("hidden");
+
+    setTimeout(() =>{
+
+        loader.classList.add("hidden");
+
+    },500);
+
+});
+
+loadIssue();
